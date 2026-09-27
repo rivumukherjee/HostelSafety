@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="theme-color" content="#f4f7f5">
+	<title>SafeHostel | Safety Monitor</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/style.css">
+	<script src="/app.js" defer></script>
+</head>
+<body>
+	<main class="shell">
+		<header class="topbar">
+			<a class="brand" href="/" aria-label="SafeHostel dashboard">
+				<span class="brand-mark" aria-hidden="true">S</span>
+				<span><strong>SAFEHOSTEL</strong><small>HOSTEL SAFETY MONITOR</small></span>
+			</a>
+			<div class="topbar-right">
+				<span id="connection" class="connection"><i></i><span>Connecting</span></span>
+				<button id="sound-toggle" class="sound-button" type="button" aria-pressed="false">Enable alert sound</button>
+			</div>
+		</header>
+
+		<section class="overview" aria-label="Current safety status">
+			<div class="status-panel" id="status-panel" data-level="unknown">
+				<div class="panel-heading"><span class="eyebrow">LIVE SYSTEM STATUS</span><span id="last-update" class="updated">Waiting for ESP32</span></div>
+				<div class="status-line"><span id="status-indicator" class="status-indicator"></span><h1 id="status-text">Waiting for device</h1></div>
+				<p id="status-detail">Start the Wokwi simulation to stream sensor readings.</p>
+			</div>
+			<div class="risk-panel">
+				<div class="panel-heading"><span class="eyebrow">RISK SCORE</span><span class="risk-scale">0–100</span></div>
+				<div class="risk-value"><strong id="risk-value">--</strong><span id="risk-label">NO DATA</span></div>
+				<div class="risk-track" role="progressbar" aria-label="Risk score" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="risk-fill"></span></div>
+			</div>
+		</section>
+
+		<section id="alert-banner" class="alert-banner" data-level="safe" aria-live="assertive">
+			<span class="alert-mark" aria-hidden="true">!</span>
+			<div><span class="eyebrow">ACTIVE ALERT</span><strong id="alert-title">No active alert</strong><p id="alert-reason">All monitored readings are within the configured limits.</p></div>
+			<span id="alarm-state" class="alarm-state">ALARM OFF</span>
+		</section>
+
+		<section class="sensor-section" aria-labelledby="sensor-heading">
+			<div class="section-heading"><div><span class="eyebrow">SENSOR FEED</span><h2 id="sensor-heading">Live readings</h2></div><span class="section-note">Wokwi ESP32 simulation</span></div>
+			<div class="sensor-grid">
+				<article class="sensor" data-sensor="gas"><div class="sensor-top"><span class="sensor-name">GAS</span><span class="sensor-unit">ADC / 4095</span></div><strong id="gas-value" class="sensor-value">--</strong><span id="gas-state" class="sensor-state">Waiting for data</span></article>
+				<article class="sensor" data-sensor="temperature"><div class="sensor-top"><span class="sensor-name">TEMPERATURE</span><span class="sensor-unit">DHT22</span></div><strong id="temperature-value" class="sensor-value">--<small>°C</small></strong><span id="temperature-state" class="sensor-state">Waiting for data</span></article>
+				<article class="sensor" data-sensor="humidity"><div class="sensor-top"><span class="sensor-name">HUMIDITY</span><span class="sensor-unit">DHT22</span></div><strong id="humidity-value" class="sensor-value">--<small>%</small></strong><span id="humidity-state" class="sensor-state">Waiting for data</span></article>
+				<article class="sensor" data-sensor="fire"><div class="sensor-top"><span class="sensor-name">FLAME PROXY</span><span class="sensor-unit">LDR INPUT</span></div><strong id="fire-value" class="sensor-value sensor-word">--</strong><span id="fire-state" class="sensor-state">Waiting for data</span></article>
+				<article class="sensor passive" data-sensor="motion"><div class="sensor-top"><span class="sensor-name">MOTION</span><span class="sensor-unit">PASSIVE</span></div><strong id="motion-value" class="sensor-value sensor-word">--</strong><span class="sensor-state">Informational only</span></article>
+				<article class="sensor device-sensor"><div class="sensor-top"><span class="sensor-name">DEVICE LINK</span><span class="sensor-unit">WOKWI → API</span></div><strong id="device-state" class="sensor-value sensor-word">OFFLINE</strong><span id="device-detail" class="sensor-state">No recent telemetry</span></article>
+			</div>
+		</section>
+
+		<section class="history-section" aria-labelledby="history-heading">
+			<div class="section-heading"><div><span class="eyebrow">IN-MEMORY LOG</span><h2 id="history-heading">Recent events</h2></div><span id="event-count" class="section-note">0 events</span></div>
+			<div class="history-wrap">
+				<table>
+					<thead><tr><th>TIME</th><th>EVENT</th><th>STATE</th></tr></thead>
+					<tbody id="history-list"><tr class="empty-row"><td colspan="3">Events will appear when the device reports a state change.</td></tr></tbody>
+				</table>
+			</div>
+		</section>
+		<footer><span>SAFEHOSTEL <b>·</b> SIMULATION PROTOTYPE</span><span id="socket-state">Connecting to local server</span></footer>
+	</main>
+</body>
+</html>
