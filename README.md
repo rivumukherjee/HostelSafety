@@ -14,16 +14,22 @@ The Wokwi circuit is kept as designed. It uses the MQ-2 gas sensor, DHT22 temper
 
 ## Run the local server
 
-Install Python 3.10 or newer first. From the project root in PowerShell:
+Use **64-bit Python 3.13** (the project is pinned to this stable release) and `uv`. From the project root in PowerShell, sync the locked dependencies and start the server:
+
+```powershell
+uv sync --python 3.13
+uv run uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Open <http://127.0.0.1:8000> (do not open `frontend/index.html` directly; the page uses the FastAPI WebSocket at `/ws`). Click **Enable alert sound** once; browsers require a user gesture before playing audio. The sound is generated in the browser and follows the reported buzzer state.
+
+To use `pip` instead of `uv`, first ensure `python --version` reports Python 3.13.x (not a prerelease), then run:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install -r backend\requirements.txt
-python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000
+.\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
+.\.venv\Scripts\python.exe -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
 ```
-
-Open <http://127.0.0.1:8000>. Click **Enable alert sound** once; browsers require a user gesture before playing audio. The sound is generated in the browser and follows the reported buzzer state.
 
 ## Connect Wokwi
 
@@ -51,6 +57,8 @@ The tunnel exposes an unauthenticated demo endpoint; anyone who obtains its URL 
 - `POST /api/events`: sensor/alarm JSON from the ESP32.
 - `WS /ws`: sends an initial snapshot and live snapshots as readings arrive.
 
+Each event includes `status` (`SAFE`, `WARNING`, `HIGH`, `CRITICAL`, `FIRE ALERT`, or `MANUAL`), `reason`, `gas` (0–4095), `temperature` (-40–125 °C), `humidity` (0–100%), `pir`, `fire`, `risk_score` (0–100), `alarm`, `alarm_muted`, optional `manual_emergency`, and optional `mute_remaining_seconds` (0–5). The dashboard shows the ESP32-reported status and risk; it does not recalculate alarm decisions. Device telemetry is considered stale after 15 seconds, based on its reported `received_at` timestamp.
+
 The history is intentionally in memory and is cleared when the server restarts. The ESP32 posts updates when its state changes and sends periodic heartbeats so the dashboard can identify stale telemetry.
 
 ## Test without Wokwi
@@ -65,9 +73,6 @@ $body = @{
 	manual_emergency = $false; mute_remaining_seconds = 0
 } | ConvertTo-Json
 Invoke-RestMethod -Uri http://127.0.0.1:8000/api/events -Method Post -ContentType "application/json" -Body $body
-```
-
-```powershell $body = @{status = "FIRE ALERT"; reason = "FIRE"; gas = 500 temperature = 28.4; humidity = 58; pir = $false; fire = $true risk_score = 60; alarm = $true; alarm_muted = $false manual_emergency = $false; mute_remaining_seconds = 0} | ConvertTo-Json Invoke-RestMethod -Uri http://127.0.0.1:8000/api/events -Method Post -ContentType "application/json" -Body $body
 ```
 
 ## Libraries

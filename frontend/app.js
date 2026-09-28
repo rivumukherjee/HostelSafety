@@ -55,14 +55,14 @@ function setSensorState(name, state) {
 
 function updateDashboard(state, history) {
 	latestState = state;
-	lastReceivedAt = Date.now();
+	lastReceivedAt = state?.received_at ? Date.parse(state.received_at) : undefined;
 	if (state) {
 		const status = state.status || "UNKNOWN";
 		const manual = Boolean(state.manual_emergency);
 		const muted = Boolean(state.alarm_muted);
 		const alarming = Boolean(state.alarm);
 		const hasHazard = status !== "SAFE";
-		const level = manual || state.fire || status === "CRITICAL" || status === "FIRE ALERT" || status === "HIGH" ? "danger" : hasHazard ? "warning" : "safe";
+		const level = manual || state.fire || ["CRITICAL", "FIRE ALERT", "HIGH"].includes(status) ? "danger" : hasHazard ? "warning" : "safe";
 		const risk = Math.max(0, Math.min(100, Number(state.risk_score) || 0));
 
 		elements.statusPanel.dataset.level = level;
@@ -70,14 +70,14 @@ function updateDashboard(state, history) {
 		elements.statusDetail.textContent = muted ? `Alarm outputs paused; sensor monitoring continues for ${state.mute_remaining_seconds || 0}s.` : manual ? "Emergency button activated. Manual alarm is active." : hasHazard ? `Detected: ${state.reason || "Hazard"}` : "No hazards detected. Monitoring is active.";
 		elements.lastUpdate.textContent = `Updated ${formatTime(state.received_at)}`;
 
-		elements.alertBanner.dataset.level = muted ? "warning" : manual || state.fire || status === "CRITICAL" || status === "HIGH" ? "danger" : hasHazard ? "warning" : "safe";
+		elements.alertBanner.dataset.level = muted ? "warning" : manual || state.fire || ["CRITICAL", "FIRE ALERT", "HIGH"].includes(status) ? "danger" : hasHazard ? "warning" : "safe";
 		elements.alertTitle.textContent = muted ? "Alarm temporarily silenced" : manual ? "Manual emergency active" : alarming ? `${status} alarm active` : hasHazard ? `${status} detected` : "No active alert";
 		elements.alertReason.textContent = muted ? `Detected condition: ${state.reason || "Manual emergency"}. Alarm outputs resume after the mute period.` : manual ? "Emergency button was pressed while the alarm was off." : hasHazard ? `Detected: ${state.reason || "Hazard"}. Risk score ${risk}.` : "All monitored readings are within the configured limits.";
 		elements.alarmState.textContent = muted ? "MUTED" : alarming ? "ALARM ON" : "ALARM OFF";
 		elements.alarmState.dataset.state = muted ? "muted" : alarming ? "on" : "off";
 
 		elements.riskValue.textContent = risk;
-		elements.riskLabel.textContent = risk >= 80 ? "CRITICAL" : risk >= 60 ? "HIGH" : risk >= 30 ? "ELEVATED" : "LOW";
+		elements.riskLabel.textContent = risk >= 100 ? "CRITICAL" : risk >= 60 ? "HIGH" : risk >= 30 ? "WARNING" : "LOW";
 		elements.riskFill.style.width = `${risk}%`;
 		elements.riskFill.style.background = risk >= 60 ? "var(--red)" : risk >= 30 ? "var(--amber)" : "var(--green)";
 		elements.riskTrack.setAttribute("aria-valuenow", String(risk));

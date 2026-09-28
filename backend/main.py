@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
@@ -13,14 +13,14 @@ from .database import EventStore
 
 
 class SensorEvent(BaseModel):
-	status: str = Field(max_length=40)
+	status: Literal["SAFE", "WARNING", "HIGH", "CRITICAL", "FIRE ALERT", "MANUAL"]
 	reason: str = Field(max_length=120)
 	gas: int = Field(ge=0, le=4095)
 	temperature: float = Field(ge=-40, le=125)
 	humidity: float = Field(ge=0, le=100)
 	pir: bool
 	fire: bool
-	risk_score: int = Field(ge=0, le=200)
+	risk_score: int = Field(ge=0, le=100)
 	alarm: bool
 	alarm_muted: bool
 	manual_emergency: bool = False
